@@ -1,0 +1,22 @@
+{
+  "name": "IlluminatedButton",
+  "keywords": "button, led, input, ouput",
+  "description": "Class for working with buttons with leds inside.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jurgenbelien/IllumiatedButton.git"
+  },
+  "version": "0.1",
+  "exclude": [
+    "*.png",
+    "*.zip"
+  ],
+  "dependencies": [
+    {
+      "name": "Bounce2",
+      "version": "^2.53"
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "*"
+}

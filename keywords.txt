@@ -1,0 +1,38 @@
+#######################################
+# Syntax Coloring Map For Bounce2
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+IlluminatedButton	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+init	KEYWORD2
+on	KEYWORD2
+onAll	KEYWORD2
+off	KEYWORD2
+offAll	KEYWORD2
+dim	KEYWORD2
+intensity	KEYWORD2
+intensityAll	KEYWORD2
+update	KEYWORD2
+pressed	KEYWORD2
+released	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+BUTTON_BOUNCE_INTERVAL LITERAL1
+ANALOG_LOW LITERAL1
+ANALOG_MID LITERAL1
+ANALOG_HIGH LITERAL1
