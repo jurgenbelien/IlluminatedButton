@@ -26,6 +26,7 @@ class IlluminatedButton {
     bool pressed(int value0);
     bool pressed(int value0, int value1);
     bool pressed(int value0, int value1, int value2);
+    bool longPressed();
     bool released();
 
     // Register callbacks
