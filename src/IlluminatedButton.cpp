@@ -22,7 +22,7 @@ void IlluminatedButton::update() {
   bool immediatePress = false;
   bool immediateRelease = false;
   bool releaseBeforeLongPress = false;
-  bool longPress = longPressedCallback
+  bool longPress = !!longPressedCallback
     && 0 < pressedMillis
     && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL;
 
@@ -76,6 +76,19 @@ bool IlluminatedButton::pressed(int value0, int value1, int value2) {
   } else {
     return false;
   }
+}
+bool IlluminatedButton::longPressed() {
+  unsigned long now = millis();
+  if (
+    0 < pressedMillis
+    && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
+  ) {
+    restore();
+    return true;
+  } else {
+    return false;
+  }
+
 }
 bool IlluminatedButton::released() {
   return debouncer.rose();
