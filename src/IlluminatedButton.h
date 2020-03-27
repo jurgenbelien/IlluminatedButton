@@ -1,5 +1,6 @@
 #define BOUNCE_WITH_PROMPT_DETECTION // Immediately register button press
 #define BUTTON_BOUNCE_INTERVAL 15
+#define BUTTON_LONG_PRESS_INTERVAL 1000
 
 #define LED_OFF  0
 #define LED_LOW  64
@@ -31,12 +32,18 @@ class IlluminatedButton {
     void onPressed(void (*callback)()) {
       pressedCallback = callback;
     }
+    void onLongPressed(void (*callback)()) {
+      longPressedCallback = callback;
+    }
     void onReleased(void (*callback)()) {
       releasedCallback = callback;
     }
     // Remove callbacks
     void removeOnPressed() {
       pressedCallback = NULL;
+    }
+    void removeOnLongPressed() {
+      longPressedCallback = NULL;
     }
     void removeOnReleased() {
       releasedCallback = NULL;
@@ -78,9 +85,6 @@ class IlluminatedButton {
     }
 
   private:
-    void intensity(int led, int value, bool save = false);
-    void restoreIntensity();
-
     int pinButton;
 
     int pinLed(int led);
@@ -92,8 +96,15 @@ class IlluminatedButton {
     int intensityLed1;
     int intensityLed2;
 
+    unsigned long pressedMillis = 0;
+
+    void intensity(int led, int value, bool save = false);
+
     void (*pressedCallback)();
+    void (*longPressedCallback)();
     void (*releasedCallback)();
+
+    void restore();
 
     Bounce debouncer;
 };

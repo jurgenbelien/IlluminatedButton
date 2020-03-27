@@ -17,12 +17,30 @@ void IlluminatedButton::init() {
 }
 void IlluminatedButton::update() {
   debouncer.update();
-  // Restore last LED values when releasing button
-  released();
+  unsigned long now = millis();
+  if (pressed() && pressedCallback) {
+    pressedCallback();
+  }
+  if (
+    longPressedCallback
+    && 0 != pressedMillis
+    && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
+  ) {
+    restore();
+    longPressedCallback();
+  }
+  if (released() && releasedCallback) {
+    releasedCallback();
+  }
 }
 
 bool IlluminatedButton::pressed() {
-  return debouncer.fell();
+  if (debouncer.fell()) {
+    pressedMillis = millis();
+    return true;
+  } else {
+    return false;
+  }
 }
 bool IlluminatedButton::pressed(int value0) {
   if (pressed()) {
@@ -50,14 +68,14 @@ bool IlluminatedButton::pressed(int value0, int value1, int value2) {
 }
 bool IlluminatedButton::released() {
   if (debouncer.rose()) {
-    restoreIntensity();
+    restore();
     return true;
   } else {
     return false;
   }
 }
 
-// Get pin number for LED;
+// Get pin number for LED
 int IlluminatedButton::pinLed(int led) {
   switch (led) {
     case 0:  return pinLed0;
@@ -76,9 +94,9 @@ void IlluminatedButton::intensity(int led, int value, bool save) {
     }
   }
 }
-
-// Restore previously set value
-void IlluminatedButton::restoreIntensity() {
+// Restore button state
+void IlluminatedButton::restore() {
+  pressedMillis = 0;
   intensity(pinLed0, intensityLed0, false);
   if (intensityLed1) intensity(pinLed1, intensityLed1, false);
   if (intensityLed2) intensity(pinLed2, intensityLed2, false);
