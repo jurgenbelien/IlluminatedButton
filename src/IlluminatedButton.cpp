@@ -18,29 +18,40 @@ void IlluminatedButton::init() {
 void IlluminatedButton::update() {
   debouncer.update();
   unsigned long now = millis();
-  if (pressed() && pressedCallback) {
+
+  bool immediatePress = false;
+  bool immediateRelease = false;
+  bool releaseBeforeLongPress = false;
+  bool longPress = !!longPressedCallback
+    && 0 < pressedMillis
+    && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL;
+
+  // Handle button state
+  if (pressed()) {
+    immediatePress = !!pressedCallback && !longPressedCallback;
+    pressedMillis = now;
+  }
+  if (released()) {
+    immediateRelease = !!releasedCallback;
+    releaseBeforeLongPress = !!longPressedCallback && now < pressedMillis + BUTTON_LONG_PRESS_INTERVAL;
+    restore();
+  }
+
+  // Handle callbacks
+  if (immediatePress || releaseBeforeLongPress) {
     pressedCallback();
   }
-  if (
-    longPressedCallback
-    && 0 != pressedMillis
-    && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
-  ) {
+  if (longPress) {
     restore();
     longPressedCallback();
   }
-  if (released() && releasedCallback) {
+  if (immediateRelease) {
     releasedCallback();
   }
 }
 
 bool IlluminatedButton::pressed() {
-  if (debouncer.fell()) {
-    pressedMillis = millis();
-    return true;
-  } else {
-    return false;
-  }
+  return debouncer.fell();
 }
 bool IlluminatedButton::pressed(int value0) {
   if (pressed()) {
@@ -66,13 +77,21 @@ bool IlluminatedButton::pressed(int value0, int value1, int value2) {
     return false;
   }
 }
-bool IlluminatedButton::released() {
-  if (debouncer.rose()) {
+bool IlluminatedButton::longPressed() {
+  unsigned long now = millis();
+  if (
+    0 < pressedMillis
+    && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
+  ) {
     restore();
     return true;
   } else {
     return false;
   }
+
+}
+bool IlluminatedButton::released() {
+  return debouncer.rose();
 }
 
 // Get pin number for LED
@@ -98,7 +117,7 @@ void IlluminatedButton::intensity(int led, int value, bool save) {
 void IlluminatedButton::restore() {
   pressedMillis = 0;
   intensity(pinLed0, intensityLed0, false);
-  if (intensityLed1) intensity(pinLed1, intensityLed1, false);
-  if (intensityLed2) intensity(pinLed2, intensityLed2, false);
+  if (!!intensityLed1) intensity(pinLed1, intensityLed1, false);
+  if (!!intensityLed2) intensity(pinLed2, intensityLed2, false);
 }
 
