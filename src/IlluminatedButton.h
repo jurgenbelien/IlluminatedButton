@@ -27,6 +27,20 @@ class IlluminatedButton {
     bool pressed(int value0, int value1, int value2);
     bool released();
 
+    // Register callbacks
+    void onPressed(void (*callback)()) {
+      pressedCallback = callback;
+    }
+    void onReleased(void (*callback)()) {
+      releasedCallback = callback;
+    }
+    // Remove callbacks
+    void removeOnPressed() {
+      pressedCallback = NULL;
+    }
+    void removeOnReleased() {
+      releasedCallback = NULL;
+    }
 
     void set(int value) {
       set(0, value);
@@ -77,6 +91,9 @@ class IlluminatedButton {
     int intensityLed0;
     int intensityLed1;
     int intensityLed2;
+
+    void (*pressedCallback)();
+    void (*releasedCallback)();
 
     Bounce debouncer;
 };
