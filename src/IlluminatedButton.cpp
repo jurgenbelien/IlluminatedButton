@@ -1,89 +1,86 @@
 #include "IlluminatedButton.h"
 
 void IlluminatedButton::init() {
+  debouncer.attach(pinButton, INPUT_PULLUP);
+  debouncer.interval(BUTTON_BOUNCE_INTERVAL);
+
   pinMode(pinLed0, OUTPUT);
-  dim(0);
+  set(0, LED_LOW);
   if (pinLed1) {
     pinMode(pinLed1, OUTPUT);
-    dim(1);
+    set(1, LED_LOW);
   }
   if (pinLed2) {
     pinMode(pinLed2, OUTPUT);
-    dim(2);
+    set(2, LED_LOW);
   }
-  debouncer.attach(pinButton, INPUT_PULLUP);
-  debouncer.interval(BUTTON_BOUNCE_INTERVAL);
 }
-
 void IlluminatedButton::update() {
   debouncer.update();
+  // Restore last LED values when releasing button
+  released();
 }
 
 bool IlluminatedButton::pressed() {
   return debouncer.fell();
 }
-
+bool IlluminatedButton::pressed(int value0) {
+  if (pressed()) {
+    intensity(0, value0, false);
+    return true;
+  } else {
+    return false;
+  }
+}
+bool IlluminatedButton::pressed(int value0, int value1) {
+  if (pressed(value0)){
+    intensity(1, value1, false);
+    return true;
+  } else {
+    return false;
+  }
+}
+bool IlluminatedButton::pressed(int value0, int value1, int value2) {
+  if (pressed(value1)){
+    intensity(2, value2, false);
+    return true;
+  } else {
+    return false;
+  }
+}
 bool IlluminatedButton::released() {
-  return debouncer.rose();
-}
-
-void IlluminatedButton::on() {
-  on(0);
-}
-
-void IlluminatedButton::on(int led) {
-  intensity(led, ANALOG_HIGH);
-}
-void IlluminatedButton::onAll() {
-  intensityAll(ANALOG_HIGH);
-}
-
-void IlluminatedButton::off() {
-  off(0);
-}
-
-void IlluminatedButton::off(int led) {
-  intensity(led, ANALOG_LOW);
-}
-
-void IlluminatedButton::offAll() {
-  intensityAll(ANALOG_LOW);
-}
-
-void IlluminatedButton::dim() {
-  dim(0);
-}
-
-void IlluminatedButton::dim(int led) {
-  intensity(led, ANALOG_MID);
-}
-
-void IlluminatedButton::intensity(int level) {
-  intensity(0, level);
-}
-
-void IlluminatedButton::intensity(int led, int level) {
-  switch (led) {
-    case 0:
-      analogWrite(pinLed0, level);
-      break;
-    case 1:
-      analogWrite(pinLed1, level);
-      break;
-    case 2:
-      analogWrite(pinLed2, level);
-      break;
+  if (debouncer.rose()) {
+    restoreIntensity();
+    return true;
+  } else {
+    return false;
   }
 }
 
-void IlluminatedButton::intensityAll(int level) {
-  analogWrite(pinLed0, level);
-  if (pinLed1) analogWrite(pinLed1, level);
-  if (pinLed2) analogWrite(pinLed2, level);
+// Get pin number for LED;
+int IlluminatedButton::pinLed(int led) {
+  switch (led) {
+    case 0:  return pinLed0;
+    case 1:  return pinLed1;
+    default: return pinLed2;
+  }
+}
+// Set illumination without saving state
+void IlluminatedButton::intensity(int led, int value, bool save) {
+  analogWrite(pinLed(led), value);
+  if (save) {
+    switch (led) {
+      case 0:  intensityLed0 = value; break;
+      case 1:  intensityLed1 = value; break;
+      default: intensityLed2 = value; break;
+    }
+  }
 }
 
-void IlluminatedButton::rgb(int r, int g, int b) {
-  analogWrite(pinLed0, r);
-  analogWrite(pinLed1, g);
-  analogWrite(pinLed2, b);
+// Restore previously set value
+void IlluminatedButton::restoreIntensity() {
+  intensity(pinLed0, intensityLed0, false);
+  if (intensityLed1) intensity(pinLed1, intensityLed1, false);
+  if (intensityLed2) intensity(pinLed2, intensityLed2, false);
 }
+
