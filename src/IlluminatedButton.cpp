@@ -51,7 +51,6 @@ void IlluminatedButton::update() {
 }
 
 bool IlluminatedButton::pressed() {
-  pressedMillis = millis();
   return debouncer.fell();
 }
 bool IlluminatedButton::pressed(uint8_t value0) {
