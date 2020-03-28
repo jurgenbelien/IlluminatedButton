@@ -6,11 +6,11 @@ void IlluminatedButton::init() {
 
   pinMode(pinLed0, OUTPUT);
   set(0, LED_LOW);
-  if (pinLed1) {
+  if (pinLed1 != pinLed0) {
     pinMode(pinLed1, OUTPUT);
     set(1, LED_LOW);
   }
-  if (pinLed2) {
+  if (pinLed2 != pinLed1) {
     pinMode(pinLed2, OUTPUT);
     set(2, LED_LOW);
   }
@@ -53,7 +53,7 @@ void IlluminatedButton::update() {
 bool IlluminatedButton::pressed() {
   return debouncer.fell();
 }
-bool IlluminatedButton::pressed(int value0) {
+bool IlluminatedButton::pressed(uint8_t value0) {
   if (pressed()) {
     intensity(0, value0, false);
     return true;
@@ -61,7 +61,7 @@ bool IlluminatedButton::pressed(int value0) {
     return false;
   }
 }
-bool IlluminatedButton::pressed(int value0, int value1) {
+bool IlluminatedButton::pressed(uint8_t value0, uint8_t value1) {
   if (pressed(value0)){
     intensity(1, value1, false);
     return true;
@@ -69,7 +69,7 @@ bool IlluminatedButton::pressed(int value0, int value1) {
     return false;
   }
 }
-bool IlluminatedButton::pressed(int value0, int value1, int value2) {
+bool IlluminatedButton::pressed(uint8_t value0, uint8_t value1, uint8_t value2) {
   if (pressed(value1)){
     intensity(2, value2, false);
     return true;
@@ -95,7 +95,7 @@ bool IlluminatedButton::released() {
 }
 
 // Get pin number for LED
-int IlluminatedButton::pinLed(int led) {
+uint8_t IlluminatedButton::pinLed(uint8_t led) {
   switch (led) {
     case 0:  return pinLed0;
     case 1:  return pinLed1;
@@ -103,7 +103,7 @@ int IlluminatedButton::pinLed(int led) {
   }
 }
 // Set illumination without saving state
-void IlluminatedButton::intensity(int led, int value, bool save) {
+void IlluminatedButton::intensity(uint8_t led, uint8_t value, bool save) {
   analogWrite(pinLed(led), value);
   if (save) {
     switch (led) {

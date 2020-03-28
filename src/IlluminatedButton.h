@@ -12,20 +12,24 @@
 
 class IlluminatedButton {
   public:
-    IlluminatedButton(int pinButton, int pinLed0) :
-      pinButton(pinButton), pinLed0(pinLed0), debouncer(Bounce()) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1) :
-      pinButton(pinButton), pinLed0(pinLed0), pinLed1(pinLed1), debouncer(Bounce()) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1, int pinLed2) :
-      pinButton(pinButton), pinLed0(pinLed0), pinLed1(pinLed1), pinLed2(pinLed2), debouncer(Bounce()) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0)
+    : IlluminatedButton(pinButton, pinLed0, pinLed0) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1)
+    : IlluminatedButton(pinButton, pinLed0, pinLed1, pinLed1) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1, uint8_t pinLed2)
+    : pinButton(pinButton),
+      pinLed0(pinLed0),
+      pinLed1(pinLed1), // Additional LED pins, when not specified in constructor
+      pinLed2(pinLed2), // they will be the same as the preceding LED pin
+      debouncer(Bounce()) {}
 
     void init();
     void update();
 
     bool pressed();
-    bool pressed(int value0);
-    bool pressed(int value0, int value1);
-    bool pressed(int value0, int value1, int value2);
+    bool pressed(uint8_t value0);
+    bool pressed(uint8_t value0, uint8_t value1);
+    bool pressed(uint8_t value0, uint8_t value1, uint8_t value2);
     bool longPressed();
     bool released();
 
@@ -50,10 +54,10 @@ class IlluminatedButton {
       releasedCallback = NULL;
     }
 
-    void set(int value) {
+    void set(uint8_t value) {
       set(0, value);
     }
-    void set(int led, int value) {
+    void set(uint8_t led, uint8_t value) {
       intensity(led, value, true);
     }
 
@@ -61,51 +65,52 @@ class IlluminatedButton {
     void on() {
       on(0);
     }
-    void on(int led) {
+    void on(uint8_t led) {
       set(led, LED_HIGH);
     }
 
     void off() {
       off(0);
     }
-    void off(int led) {
+    void off(uint8_t led) {
       set(led, LED_OFF);
     }
 
     void dim() {
       dim(0);
     }
-    void dim(int led) {
+    void dim(uint8_t led) {
       set(led, LED_MID);
     }
 
-    void rgb(int r, int g, int b) {
+    void rgb(uint8_t r, uint8_t g, uint8_t b) {
       intensity(0, r, true);
       intensity(1, g, true);
       intensity(2, b, true);
     }
 
   private:
-    int pinButton;
+    const uint8_t pinButton;
 
-    int pinLed(int led);
-    int pinLed0;
-    int pinLed1;
-    int pinLed2;
+    const uint8_t pinLed0;
+    const uint8_t pinLed1;
+    const uint8_t pinLed2;
 
-    int intensityLed0;
-    int intensityLed1;
-    int intensityLed2;
+    uint8_t pinLed(uint8_t led);
+
+    uint8_t intensityLed0 = LED_LOW;
+    uint8_t intensityLed1 = LED_LOW;
+    uint8_t intensityLed2 = LED_LOW;
 
     unsigned long pressedMillis = 0;
 
-    void intensity(int led, int value, bool save = false);
+    void intensity(uint8_t led, uint8_t value, bool save = false);
 
     void (*pressedCallback)();
     void (*longPressedCallback)();
     void (*releasedCallback)();
 
-    void restore();
+    const void restore();
 
     Bounce debouncer;
 };
