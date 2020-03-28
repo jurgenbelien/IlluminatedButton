@@ -15,10 +15,10 @@ Class for working with buttons with leds inside. This class is dependent on
 IlluminatedButton button(PIN_BUTTON, PIN_LED);
 
 void logPressed() {
-  Serial.println("Button pressed"):
+  Serial.println("Button pressed");
 }
 void logLongPressed() {
-  Serial.println("Button long-pressed"):
+  Serial.println("Button long-pressed");
 }
 
 void setup() {
@@ -30,14 +30,14 @@ void setup() {
 
   // Add functionality with callbacks...
   button.onPressed(logPressed);
-  button.onLongPressed(logLongPressed)
+  button.onLongPressed(logLongPressed);
 }
 
 void loop() {
   button.update();
 
   // ...or use conditionals inside loop()
-  if(button.released()) {
+  if (button.released()) {
     Serial.println("Button released");
   }
 }

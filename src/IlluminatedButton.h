@@ -110,7 +110,7 @@ class IlluminatedButton {
     void (*longPressedCallback)();
     void (*releasedCallback)();
 
-    const void restore();
+    void restoreIntensity();
 
     Bounce debouncer;
 };

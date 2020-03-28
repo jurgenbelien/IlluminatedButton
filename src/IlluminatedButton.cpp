@@ -1,5 +1,6 @@
 #include "IlluminatedButton.h"
 
+
 void IlluminatedButton::init() {
   debouncer.attach(pinButton, INPUT_PULLUP);
   debouncer.interval(BUTTON_BOUNCE_INTERVAL);
@@ -19,33 +20,34 @@ void IlluminatedButton::update() {
   debouncer.update();
   unsigned long now = millis();
 
-  bool immediatePress = false;
-  bool immediateRelease = false;
-  bool releaseBeforeLongPress = false;
-  bool longPress = !!longPressedCallback
-    && 0 < pressedMillis
+  bool isPressedImmediately = false;
+  bool isReleased = false;
+  bool isReleasedBeforeLongPress = false;
+  bool isLongPressed = 0 < pressedMillis
     && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL;
 
   // Handle button state
   if (pressed()) {
-    immediatePress = !!pressedCallback && !longPressedCallback;
+    isPressedImmediately = !longPressedCallback;
     pressedMillis = now;
   }
   if (released()) {
-    immediateRelease = !!releasedCallback;
-    releaseBeforeLongPress = !!longPressedCallback && now < pressedMillis + BUTTON_LONG_PRESS_INTERVAL;
-    restore();
+    isReleased = true;
+    isReleasedBeforeLongPress = !isLongPressed;
+    pressedMillis = 0;
+    restoreIntensity();
   }
 
   // Handle callbacks
-  if (immediatePress || releaseBeforeLongPress) {
+  if (!!pressedCallback && (isPressedImmediately || isReleasedBeforeLongPress)) {
     pressedCallback();
   }
-  if (longPress) {
-    restore();
+  if (!!longPressedCallback && isLongPressed) {
     longPressedCallback();
+    pressedMillis = 0;
+    restoreIntensity();
   }
-  if (immediateRelease) {
+  if (!!releasedCallback && isReleased) {
     releasedCallback();
   }
 }
@@ -83,7 +85,7 @@ bool IlluminatedButton::longPressed() {
     0 < pressedMillis
     && now > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
   ) {
-    restore();
+    restoreIntensity();
     return true;
   } else {
     return false;
@@ -114,10 +116,9 @@ void IlluminatedButton::intensity(uint8_t led, uint8_t value, bool save) {
   }
 }
 // Restore button state
-void IlluminatedButton::restore() {
-  pressedMillis = 0;
+void IlluminatedButton::restoreIntensity() {
   intensity(pinLed0, intensityLed0, false);
-  if (!!intensityLed1) intensity(pinLed1, intensityLed1, false);
-  if (!!intensityLed2) intensity(pinLed2, intensityLed2, false);
+  if (pinLed1 != pinLed0) intensity(pinLed1, intensityLed1, false);
+  if (pinLed2 != pinLed1) intensity(pinLed2, intensityLed2, false);
 }
 
