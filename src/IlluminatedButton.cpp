@@ -16,28 +16,31 @@ void IlluminatedButton::init() {
     set(2, LED_LOW);
   }
 }
+
 void IlluminatedButton::update() {
   debouncer.update();
 
-  bool isPressedImmediately = false;
-  bool isReleased = false;
-  bool isReleasedBeforeLongPress = false;
-  bool isLongPressed = false;
-
-  // Handle button state
-  if (pressed()) {
-    isPressedImmediately = !longPressedCallback;
+  // Handle last update() iteration
+  if (isPressed) {
+    pressedTimestamp = millis();
   }
-  if (longPressed()) {
-    isLongPressed = true;
+  if (isLongPressed) {
+    pressedTimestamp = 0;
   }
-  if (released()) {
-    isReleased = true;
-    isReleasedBeforeLongPress = !isLongPressed;
+  if (isReleased) {
+    pressedTimestamp = 0;
     restoreIntensity();
   }
 
-  // Handle callbacks
+  // Get state from hardware
+  isPressed = debouncer.fell();
+  isLongPressed = (0 < pressedTimestamp && millis() > pressedTimestamp + BUTTON_LONG_PRESS_INTERVAL);
+  isReleased = debouncer.rose();
+
+  // Run callbacks
+  bool isPressedImmediately = isPressed && !longPressedCallback;
+  bool isReleasedBeforeLongPress = isReleased && !isLongPressed;
+
   if (!!pressedCallback && (isPressedImmediately || isReleasedBeforeLongPress)) {
     pressedCallback();
   }
@@ -51,7 +54,7 @@ void IlluminatedButton::update() {
 }
 
 bool IlluminatedButton::pressed() {
-  return debouncer.fell();
+  return isPressed;
 }
 bool IlluminatedButton::pressed(uint8_t value0) {
   return (pressed() && intensity(0, value0));
@@ -63,14 +66,10 @@ bool IlluminatedButton::pressed(uint8_t value0, uint8_t value1, uint8_t value2) 
   return (pressed(value1) && intensity(2, value2));
 }
 bool IlluminatedButton::longPressed() {
-  return (
-    0 < pressedMillis
-    && millis() > pressedMillis + BUTTON_LONG_PRESS_INTERVAL
-  );
+  return isLongPressed;
 }
 bool IlluminatedButton::released() {
-  pressedMillis = 0;
-  return debouncer.rose();
+  return isReleased;
 }
 
 // Register callbacks
@@ -151,10 +150,10 @@ bool IlluminatedButton::intensity(uint8_t led, uint8_t value) {
   intensity(led, value, false);
   return true;
 }
-// Restore button state
-void IlluminatedButton::restoreIntensity() {
+// Restore button LED state
+bool IlluminatedButton::restoreIntensity() {
   intensity(pinLed0, intensityLed0, false);
   if (pinLed1 != pinLed0) intensity(pinLed1, intensityLed1, false);
   if (pinLed2 != pinLed1) intensity(pinLed2, intensityLed2, false);
+  return true;
 }
-

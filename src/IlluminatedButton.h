@@ -34,7 +34,6 @@ class IlluminatedButton {
     bool longPressed();
     bool released();
 
-
     // Callbacks
     void onPressed(void (*callback)());
     void onLongPressed(void (*callback)());
@@ -57,27 +56,29 @@ class IlluminatedButton {
 
   private:
     const uint8_t pinButton;
-
     const uint8_t pinLed0;
     const uint8_t pinLed1;
     const uint8_t pinLed2;
+    Bounce debouncer;
 
     uint8_t pinLed(uint8_t led);
 
-    uint8_t intensityLed0 = LED_LOW;
-    uint8_t intensityLed1 = LED_LOW;
-    uint8_t intensityLed2 = LED_LOW;
+    bool isPressed = false;
+    bool isLongPressed = false;
+    bool isReleased = false;
 
-    unsigned long pressedMillis = 0;
-
-    void intensity(uint8_t led, uint8_t value, bool save);
-    bool intensity(uint8_t led, uint8_t value);
+    bool restoreIntensity();
 
     void (*pressedCallback)();
     void (*longPressedCallback)();
     void (*releasedCallback)();
 
-    void restoreIntensity();
+    void intensity(uint8_t led, uint8_t value, bool save);
+    bool intensity(uint8_t led, uint8_t value);
 
-    Bounce debouncer;
+    uint8_t intensityLed0 = LED_LOW;
+    uint8_t intensityLed1 = LED_LOW;
+    uint8_t intensityLed2 = LED_LOW;
+
+    unsigned long pressedTimestamp = 0;
 };
