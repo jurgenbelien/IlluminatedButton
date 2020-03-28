@@ -12,12 +12,16 @@
 
 class IlluminatedButton {
   public:
-    IlluminatedButton(int pinButton, int pinLed0) :
-      pinButton(pinButton), pinLed0(pinLed0), debouncer(Bounce()) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1) :
-      pinButton(pinButton), pinLed0(pinLed0), pinLed1(pinLed1), debouncer(Bounce()) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1, int pinLed2) :
-      pinButton(pinButton), pinLed0(pinLed0), pinLed1(pinLed1), pinLed2(pinLed2), debouncer(Bounce()) {}
+    IlluminatedButton(int pinButton, int pinLed0)
+    : IlluminatedButton(pinButton, pinLed0, pinLed0) {}
+    IlluminatedButton(int pinButton, int pinLed0, int pinLed1)
+    : IlluminatedButton(pinButton, pinLed0, pinLed1, pinLed1) {}
+    IlluminatedButton(int pinButton, int pinLed0, int pinLed1, int pinLed2)
+    : pinButton(pinButton),
+      pinLed0(pinLed0),
+      pinLed1(pinLed1),
+      pinLed2(pinLed2),
+      debouncer(Bounce()) {}
 
     void init();
     void update();
@@ -105,7 +109,7 @@ class IlluminatedButton {
     void (*longPressedCallback)();
     void (*releasedCallback)();
 
-    void restore();
+    void restoreIntensity();
 
     Bounce debouncer;
 };
