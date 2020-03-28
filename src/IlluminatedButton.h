@@ -8,6 +8,7 @@
 #define LED_HIGH 255
 
 #include <core_pins.h>
+#include <stddef.h>
 #include <Bounce2.h>
 
 class IlluminatedButton {
@@ -33,61 +34,26 @@ class IlluminatedButton {
     bool longPressed();
     bool released();
 
-    // Register callbacks
-    void onPressed(void (*callback)()) {
-      pressedCallback = callback;
-    }
-    void onLongPressed(void (*callback)()) {
-      longPressedCallback = callback;
-    }
-    void onReleased(void (*callback)()) {
-      releasedCallback = callback;
-    }
-    // Remove callbacks
-    void removeOnPressed() {
-      pressedCallback = NULL;
-    }
-    void removeOnLongPressed() {
-      longPressedCallback = NULL;
-    }
-    void removeOnReleased() {
-      releasedCallback = NULL;
-    }
 
-    void set(uint8_t value) {
-      set(0, value);
-    }
-    void set(uint8_t led, uint8_t value) {
-      intensity(led, value, true);
-    }
+    // Callbacks
+    void onPressed(void (*callback)());
+    void onLongPressed(void (*callback)());
+    void onReleased(void (*callback)());
+    void removeOnPressed();
+    void removeOnLongPressed();
+    void removeOnReleased();
+
+    void set(uint8_t value);
+    void set(uint8_t led, uint8_t value);
 
     // Convienence methods
-    void on() {
-      on(0);
-    }
-    void on(uint8_t led) {
-      set(led, LED_HIGH);
-    }
-
-    void off() {
-      off(0);
-    }
-    void off(uint8_t led) {
-      set(led, LED_OFF);
-    }
-
-    void dim() {
-      dim(0);
-    }
-    void dim(uint8_t led) {
-      set(led, LED_MID);
-    }
-
-    void rgb(uint8_t r, uint8_t g, uint8_t b) {
-      intensity(0, r, true);
-      intensity(1, g, true);
-      intensity(2, b, true);
-    }
+    void on();
+    void on(uint8_t led);
+    void off();
+    void off(uint8_t led);
+    void dim();
+    void dim(uint8_t led);
+    void rgb(uint8_t r, uint8_t g, uint8_t b);
 
   private:
     const uint8_t pinButton;
@@ -104,7 +70,8 @@ class IlluminatedButton {
 
     unsigned long pressedMillis = 0;
 
-    void intensity(uint8_t led, uint8_t value, bool save = false);
+    void intensity(uint8_t led, uint8_t value, bool save);
+    bool intensity(uint8_t led, uint8_t value);
 
     void (*pressedCallback)();
     void (*longPressedCallback)();
