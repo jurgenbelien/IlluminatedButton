@@ -24,7 +24,10 @@ void Button::update() {
   isLongPressed = (0 < pressedTimestamp && millis() > pressedTimestamp + BUTTON_LONG_PRESS_INTERVAL);
   isReleased = debouncer.rose();
 
-  // Run callbacks
+  executeCallbacks();
+}
+
+void Button::executeCallbacks() {
   bool isPressedImmediately = isPressed && !longPressedCallback;
   bool isReleasedBeforeLongPress = isReleased && !isLongPressed;
 

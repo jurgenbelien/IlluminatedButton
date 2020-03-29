@@ -13,8 +13,8 @@ class Button {
 
     void init();
     void update();
-
     // Callbacks
+
     void onPressed(void (*callback)());
     void onLongPressed(void (*callback)());
     void onReleased(void (*callback)());
@@ -37,6 +37,7 @@ class Button {
     bool isLongPressed = false;
     bool isReleased = false;
 
+    void executeCallbacks();
     void (*pressedCallback)();
     void (*longPressedCallback)();
     void (*releasedCallback)();
