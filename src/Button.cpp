@@ -1,63 +1,48 @@
 #include "Button.h"
 
 void Button::init() {
-  debouncer.attach(pinButton, INPUT_PULLUP);
-  debouncer.interval(BUTTON_BOUNCE_INTERVAL);
+  pinMode(pinButton, INPUT_PULLUP);
+  lastState = getHardwareState();
 }
 
 void Button::update() {
-  debouncer.update();
+  // Reset change tracking
+  stateChanged = false;
 
-  // Handle last update() iteration
-  if (isPressed) {
-    pressedTimestamp = millis();
-  }
-  if (isLongPressed) {
-    pressedTimestamp = 0;
-  }
-  if (isReleased) {
-    pressedTimestamp = 0;
-  }
+  // Throttled checking of hardware state
+  if (THROTTLE_INTERVAL < stateDuration()) {
+    bool currentState = getHardwareState();
+    stateChanged = currentState != lastState;
 
-  // Get state from hardware
-  isPressed = debouncer.fell();
-  isLongPressed = (0 < pressedTimestamp && millis() > pressedTimestamp + BUTTON_LONG_PRESS_INTERVAL);
-  isReleased = debouncer.rose();
+    if (stateChanged) {
+      stateChangeTimestamp = millis();
+      lastState = currentState;
+    }
+  }
 
   executeCallbacks();
 }
 
 void Button::executeCallbacks() {
-  bool isPressedImmediately = isPressed && !longPressedCallback;
-  bool isReleasedBeforeLongPress = isReleased && !isLongPressed;
-
-  if (!!pressedCallback && (isPressedImmediately || isReleasedBeforeLongPress)) {
+  if (!!pressedCallback && pressed()) {
     pressedCallback();
   }
-  if (!!longPressedCallback && isLongPressed) {
-    longPressedCallback();
-  }
-  if (!!releasedCallback && isReleased) {
+  if (!!releasedCallback && released()) {
     releasedCallback();
   }
 }
 
 bool Button::pressed() {
-  return isPressed;
+  return stateChanged && lastState;
 }
-bool Button::longPressed() {
-  return isLongPressed;
 }
 bool Button::released() {
-  return isReleased;
+  return stateChanged && !lastState;
 }
 
 // Register callbacks
 void Button::onPressed(void (*callback)()) {
   pressedCallback = callback;
-}
-void Button::onLongPressed(void (*callback)()) {
-  longPressedCallback = callback;
 }
 void Button::onReleased(void (*callback)()) {
   releasedCallback = callback;
@@ -66,9 +51,13 @@ void Button::onReleased(void (*callback)()) {
 void Button::removeOnPressed() {
   pressedCallback = NULL;
 }
-void Button::removeOnLongPressed() {
-  longPressedCallback = NULL;
-}
 void Button::removeOnReleased() {
   releasedCallback = NULL;
+}
+
+bool Button::getHardwareState() {
+  return !digitalRead(pinButton); // with INPUT_PULLUP, down is 1, up is 0;
+}
+int Button::stateDuration() {
+  return millis() - stateChangeTimestamp;
 }

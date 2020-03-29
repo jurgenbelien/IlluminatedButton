@@ -26,6 +26,7 @@ class IlluminatedButton : public Button, public Led {
     void init();
     void update();
 
+    bool pressed();
     bool pressed(uint8_t value0);
     bool pressed(uint8_t value0, uint8_t value1);
     bool pressed(uint8_t value0, uint8_t value1, uint8_t value2);
