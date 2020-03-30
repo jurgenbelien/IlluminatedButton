@@ -1,4 +1,4 @@
-#define THROTTLE_INTERVAL 25
+#define THROTTLE_INTERVAL 5
 
 #include <inttypes.h>
 #include <core_pins.h>
@@ -29,9 +29,10 @@ class Button {
     bool lastState = 0;
     bool stateChanged = false;
     bool getHardwareState();
-    unsigned long int stateChangeTimestamp = 0;
+    unsigned long int stateChangeTimestamp = millis();
     unsigned long int handledStateChangeTimestamp = 0;
-    int stateDuration();
+
+    int durationSince(unsigned long int timestamp);
 
     void executeCallbacks();
     void (*pressedCallback)();

@@ -11,6 +11,7 @@ void Button::update() {
 
   // Throttled checking of hardware state
   if (THROTTLE_INTERVAL < stateDuration()) {
+  if (durationSince(stateChangeTimestamp) > THROTTLE_INTERVAL) {
     bool currentState = getHardwareState();
     stateChanged = currentState != lastState;
 
@@ -58,6 +59,6 @@ void Button::removeOnReleased() {
 bool Button::getHardwareState() {
   return !digitalRead(pinButton); // with INPUT_PULLUP, down is 1, up is 0;
 }
-int Button::stateDuration() {
-  return millis() - stateChangeTimestamp;
+int Button::durationSince(unsigned long timestamp) {
+  return (timestamp == 0) ? 0 : millis() - timestamp;
 }
