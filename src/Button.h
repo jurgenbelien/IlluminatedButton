@@ -4,6 +4,9 @@
 #include <inttypes.h>
 #include <core_pins.h>
 #include <stddef.h>
+#include <map>
+
+typedef   void (*function)();
 
 class Button {
   public:
@@ -15,14 +18,17 @@ class Button {
 
     bool pressed();
     bool held();
-    bool held(int duration);
+    bool held(int duration, bool updateHandledDuration = true);
     bool released();
 
     // Callbacks
-    void onPressed(void (*callback)());
-    void onReleased(void (*callback)());
+    void onPressed(function callback);
+    void onReleased(function callback);
+    void onHeld(int duration, function callback);
     void removeOnPressed();
     void removeOnReleased();
+    void removeOnHeld(int duration);
+    void removeOnHeld(function callback);
 
   private:
     const uint8_t pinButton;
@@ -33,11 +39,12 @@ class Button {
 
     unsigned long int stateChangeTimestamp = millis();
     int handledDuration = 0;
+    int callbackHandledDuration = 0;
     int durationSince(unsigned long int timestamp);
 
     void executeCallbacks();
-    void (*pressedCallback)();
-    void (*longPressedCallback)();
-    void (*releasedCallback)();
+    void (*onPressedCallback)();
+    void (*onReleasedCallback)();
+    std::map<int, function> onHeldCallbacks;
 
 };

@@ -16,6 +16,7 @@ void Button::update() {
     if (stateChanged) {
       stateChangeTimestamp = millis();
       handledDuration = 0;
+      callbackHandledDuration = 0;
       lastState = currentState;
     }
   }
@@ -24,11 +25,24 @@ void Button::update() {
 }
 
 void Button::executeCallbacks() {
-  if (!!pressedCallback && pressed()) {
-    pressedCallback();
+  if (!!onPressedCallback && pressed()) {
+    onPressedCallback();
   }
-  if (!!releasedCallback && released()) {
-    releasedCallback();
+  if (!!onReleasedCallback && released()) {
+    onReleasedCallback();
+  }
+  if (onHeldCallbacks.size() > 0 && held()) {
+    for (std::pair<int, function> entry : onHeldCallbacks) {
+      int duration = entry.first;
+      if (
+        callbackHandledDuration < duration // previously handled duration is lower than specified callback duration
+        && held(duration, false) // held duration is met
+      ) {
+        function callback = entry.second;
+        callbackHandledDuration = duration;
+        callback();
+      }
+    }
   }
 }
 
@@ -38,12 +52,12 @@ bool Button::pressed() {
 bool Button::held() {
   return lastState;
 }
-bool Button::held(int duration) {
+bool Button::held(int duration, bool updateHandledDuration) {
   bool heldForDuration = lastState // Button is down
-    && durationSince(stateChangeTimestamp) > duration // for longer than specified duration
+    && durationSince(stateChangeTimestamp) > duration // for longer than specified
     && handledDuration < duration // and previously handled duration is lower than specified duration
   ;
-  if (heldForDuration) {
+  if (heldForDuration && updateHandledDuration) {
     handledDuration = duration;
   }
   return heldForDuration;
@@ -53,18 +67,31 @@ bool Button::released() {
 }
 
 // Register callbacks
-void Button::onPressed(void (*callback)()) {
-  pressedCallback = callback;
+void Button::onPressed(function callback) {
+  onPressedCallback = callback;
 }
-void Button::onReleased(void (*callback)()) {
-  releasedCallback = callback;
+void Button::onReleased(function callback) {
+  onReleasedCallback = callback;
+}
+void Button::onHeld(int duration, function callback) {
+  onHeldCallbacks.insert(std::make_pair(duration, callback));
 }
 // Remove callbacks
 void Button::removeOnPressed() {
-  pressedCallback = NULL;
+  onPressedCallback = NULL;
 }
 void Button::removeOnReleased() {
-  releasedCallback = NULL;
+  onReleasedCallback = NULL;
+}
+void Button::removeOnHeld(int duration){
+  onHeldCallbacks.erase(duration);
+}
+void Button::removeOnHeld(function callback){
+  for (std::pair<int, function> entry : onHeldCallbacks) {
+    if (entry.second == callback) {
+      onHeldCallbacks.erase(entry.first);
+    }
+  }
 }
 
 bool Button::getHardwareState() {
