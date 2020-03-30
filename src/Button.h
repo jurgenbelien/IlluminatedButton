@@ -1,3 +1,4 @@
+
 #define THROTTLE_INTERVAL 5
 
 #include <inttypes.h>
@@ -29,9 +30,9 @@ class Button {
     bool lastState = 0;
     bool stateChanged = false;
     bool getHardwareState();
-    unsigned long int stateChangeTimestamp = millis();
-    unsigned long int handledStateChangeTimestamp = 0;
 
+    unsigned long int stateChangeTimestamp = millis();
+    int handledDuration = 0;
     int durationSince(unsigned long int timestamp);
 
     void executeCallbacks();

@@ -9,14 +9,13 @@ void Button::update() {
   // Reset change tracking
   stateChanged = false;
 
-  // Throttled checking of hardware state
-  if (THROTTLE_INTERVAL < stateDuration()) {
   if (durationSince(stateChangeTimestamp) > THROTTLE_INTERVAL) {
     bool currentState = getHardwareState();
     stateChanged = currentState != lastState;
 
     if (stateChanged) {
       stateChangeTimestamp = millis();
+      handledDuration = 0;
       lastState = currentState;
     }
   }
@@ -36,6 +35,18 @@ void Button::executeCallbacks() {
 bool Button::pressed() {
   return stateChanged && lastState;
 }
+bool Button::held() {
+  return lastState;
+}
+bool Button::held(int duration) {
+  bool heldForDuration = lastState // Button is down
+    && durationSince(stateChangeTimestamp) > duration // for longer than specified duration
+    && handledDuration < duration // and previously handled duration is lower than specified duration
+  ;
+  if (heldForDuration) {
+    handledDuration = duration;
+  }
+  return heldForDuration;
 }
 bool Button::released() {
   return stateChanged && !lastState;
