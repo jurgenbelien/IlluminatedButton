@@ -1,45 +1,50 @@
-#define BOUNCE_WITH_PROMPT_DETECTION // Immediately register button press
-#define BUTTON_BOUNCE_INTERVAL 15
-#define BUTTON_LONG_PRESS_INTERVAL 1000
+
+#define THROTTLE_INTERVAL 5
 
 #include <inttypes.h>
 #include <core_pins.h>
-#include <Bounce2.h>
+#include <stddef.h>
+#include <map>
+
+typedef   void (*function)();
 
 class Button {
   public:
     Button(uint8_t pinButton)
-    : pinButton(pinButton), debouncer(Bounce()) {}
+    : pinButton(pinButton) {}
 
     void init();
     void update();
 
-    // Callbacks
-    void onPressed(void (*callback)());
-    void onLongPressed(void (*callback)());
-    void onReleased(void (*callback)());
-    void removeOnPressed();
-    void removeOnLongPressed();
-    void removeOnReleased();
-
     bool pressed();
-    bool longPressed();
+    bool held();
+    bool held(int duration, bool updateHandledDuration = true);
     bool released();
 
-  protected:
+    // Callbacks
+    void onPressed(function callback);
+    void onReleased(function callback);
+    void onHeld(int duration, function callback);
+    void removeOnPressed();
+    void removeOnReleased();
+    void removeOnHeld(int duration);
+    void removeOnHeld(function callback);
 
   private:
     const uint8_t pinButton;
 
-    Bounce debouncer;
+    bool lastState = 0;
+    bool stateChanged = false;
+    bool getHardwareState();
 
-    bool isPressed = false;
-    bool isLongPressed = false;
-    bool isReleased = false;
+    unsigned long int stateChangeTimestamp = millis();
+    int handledDuration = 0;
+    int callbackHandledDuration = 0;
+    int durationSince(unsigned long int timestamp);
 
-    void (*pressedCallback)();
-    void (*longPressedCallback)();
-    void (*releasedCallback)();
+    void executeCallbacks();
+    void (*onPressedCallback)();
+    void (*onReleasedCallback)();
+    std::map<int, function> onHeldCallbacks;
 
-    unsigned long pressedTimestamp = 0;
 };

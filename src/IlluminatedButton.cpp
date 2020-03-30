@@ -11,13 +11,16 @@ void IlluminatedButton::init() {
 
 void IlluminatedButton::update() {
   Button::update();
-  if(Button::released()) {
+  if (Button::released()) {
     restore();
   }
 }
 
+bool IlluminatedButton::pressed() {
+  return Button::pressed();
+}
 bool IlluminatedButton::pressed(uint8_t value0) {
-  return Button::pressed()
+  return IlluminatedButton::pressed()
     && setHardwareLedIntensity(0, value0);
 }
 bool IlluminatedButton::pressed(uint8_t value0, uint8_t value1) {
