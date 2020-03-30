@@ -8,8 +8,9 @@ IlluminatedButton button(PIN_BUTTON, PIN_LED);
 void logPress() {
   Serial.println("Button pressed");
 }
-void logLongPress() {
-  Serial.println("Button long-pressed");
+void logHeld() {
+  Serial.println("Button held");
+  button.removeOnHeld(logHeld);
 }
 void logRelease() {
   Serial.println("Button released");
@@ -20,7 +21,7 @@ void setup() {
   button.init();
 
   button.onPressed(logPress);
-  button.onLongPressed(logLongPress);
+  button.onHeld(500, logHeld);
   button.onReleased(logRelease);
 }
 

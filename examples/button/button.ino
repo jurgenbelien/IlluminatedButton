@@ -16,7 +16,7 @@ void loop() {
   if (button.pressed()) {
     Serial.println("Button pressed");
   }
-  if (button.longPressed()) {
+  if (button.held(500)) {
     Serial.println("Button long-pressed");
   }
   if (button.released()) {
