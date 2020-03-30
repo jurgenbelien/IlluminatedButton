@@ -2,7 +2,7 @@
 
 void Button::init() {
   pinMode(pinButton, INPUT_PULLUP);
-  lastState = getHardwareState();
+  state = getHardwareState();
 }
 
 void Button::update() {
@@ -10,14 +10,12 @@ void Button::update() {
   stateChanged = false;
 
   if (durationSince(stateChangeTimestamp) > THROTTLE_INTERVAL) {
-    bool currentState = getHardwareState();
-    stateChanged = currentState != lastState;
-
+    stateChanged = getHardwareState() != state;
     if (stateChanged) {
+      previousStateChangeTimestamp = stateChangeTimestamp;
       stateChangeTimestamp = millis();
       handledDuration = 0;
-      callbackHandledDuration = 0;
-      lastState = currentState;
+      state = !state;
     }
   }
 
@@ -25,35 +23,37 @@ void Button::update() {
 }
 
 void Button::executeCallbacks() {
-  if (!!onPressedCallback && pressed()) {
+  bool hasOnHeldCallbacks = onHeldCallbacks.size() > 0;
+  if (!!onPressedCallback && !hasOnHeldCallbacks && pressed()) {
     onPressedCallback();
+  }
+  if (hasOnHeldCallbacks && released()) {
+    function callback = onPressedCallback;
+    for (std::pair<int, function> entry : onHeldCallbacks) {
+      int duration = entry.first;
+      // Highest registered duration lower than state duration is executed
+      if (duration < durationSince(previousStateChangeTimestamp)) {
+        callback = entry.second;
+        break;
+      }
+    }
+    if (callback != NULL) {
+      callback();
+    }
   }
   if (!!onReleasedCallback && released()) {
     onReleasedCallback();
   }
-  if (onHeldCallbacks.size() > 0 && held()) {
-    for (std::pair<int, function> entry : onHeldCallbacks) {
-      int duration = entry.first;
-      if (
-        callbackHandledDuration < duration // previously handled duration is lower than specified callback duration
-        && held(duration, false) // held duration is met
-      ) {
-        function callback = entry.second;
-        callbackHandledDuration = duration;
-        callback();
-      }
-    }
-  }
 }
 
 bool Button::pressed() {
-  return stateChanged && lastState;
+  return stateChanged && state;
 }
 bool Button::held() {
-  return lastState;
+  return state;
 }
 bool Button::held(int duration, bool updateHandledDuration) {
-  bool heldForDuration = lastState // Button is down
+  bool heldForDuration = state // Button is down
     && durationSince(stateChangeTimestamp) > duration // for longer than specified
     && handledDuration < duration // and previously handled duration is lower than specified duration
   ;
@@ -63,7 +63,7 @@ bool Button::held(int duration, bool updateHandledDuration) {
   return heldForDuration;
 }
 bool Button::released() {
-  return stateChanged && !lastState;
+  return stateChanged && !state;
 }
 
 // Register callbacks

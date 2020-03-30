@@ -33,18 +33,17 @@ class Button {
   private:
     const uint8_t pinButton;
 
-    bool lastState = 0;
+    bool state = 0;
     bool stateChanged = false;
     bool getHardwareState();
-
     unsigned long int stateChangeTimestamp = millis();
+    unsigned long int previousStateChangeTimestamp = millis();
     int handledDuration = 0;
-    int callbackHandledDuration = 0;
     int durationSince(unsigned long int timestamp);
 
     void executeCallbacks();
     void (*onPressedCallback)();
     void (*onReleasedCallback)();
-    std::map<int, function> onHeldCallbacks;
+    std::map<int, function> onHeldCallbacks; // sort highest to lowest
 
 };
