@@ -24,7 +24,7 @@ class Button {
     // Callbacks
     void onPressed(function callback);
     void onReleased(function callback);
-    void onHeld(int duration, function callback);
+    void onHeld(function callback, int duration);
     void removeOnPressed();
     void removeOnReleased();
     void removeOnHeld(int duration);

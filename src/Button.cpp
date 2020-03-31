@@ -74,7 +74,7 @@ void Button::onPressed(function callback) {
 void Button::onReleased(function callback) {
   onReleasedCallback = callback;
 }
-void Button::onHeld(int duration, function callback) {
+void Button::onHeld(function callback, int duration) {
   onHeldCallbacks.insert(std::make_pair(duration, callback));
 }
 // Remove callbacks
