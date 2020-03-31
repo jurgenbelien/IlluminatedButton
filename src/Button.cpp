@@ -6,15 +6,14 @@ void Button::init() {
 }
 
 void Button::update() {
-  // Reset change tracking
-  stateChanged = false;
-
+  stateChanged = false;   // Reset change tracking
   if (durationSince(stateChangeTimestamp) > THROTTLE_INTERVAL) {
     stateChanged = getHardwareState() != state;
     if (stateChanged) {
       previousStateChangeTimestamp = stateChangeTimestamp;
       stateChangeTimestamp = millis();
-      handledDuration = 0;
+      handledDuration = -1;
+      handledTimeout = -1;
       state = !state;
     }
   }
@@ -22,86 +21,83 @@ void Button::update() {
   executeCallbacks();
 }
 
-void Button::executeCallbacks() {
-  bool hasOnHeldCallbacks = onHeldCallbacks.size() > 0;
-  if (!!onPressedCallback && !hasOnHeldCallbacks && pressed()) {
-    onPressedCallback();
-  }
-  if (hasOnHeldCallbacks && released()) {
-    function callback = onPressedCallback;
-    for (std::pair<int, function> entry : onHeldCallbacks) {
-      int duration = entry.first;
-      // Highest registered duration lower than state duration is executed
-      if (duration < durationSince(previousStateChangeTimestamp)) {
-        callback = entry.second;
-        break;
-      }
-    }
-    if (callback != NULL) {
-      callback();
-    }
-  }
-  if (!!onReleasedCallback && released()) {
-    onReleasedCallback();
-  }
-}
-
 bool Button::pressed() {
   return stateChanged && state;
 }
-bool Button::held() {
-  return state;
+int Button::held() {
+  return state ? durationSince(stateChangeTimestamp) : 0;
 }
-bool Button::held(int duration, bool lead) {
+bool Button::held(unsigned int duration, bool leading) {
   // Test for leading side held
-  if (lead && leading(duration)) {
-    if (handledDuration < duration) {
-      handledDuration = duration; // return true once for this duration
+  if (leading && heldLeading(duration)) {
+    if (handledDuration < (int) duration) {
+      handledDuration = duration; // only return true once for this duration
       return true;
     }
+    return false;
   }
   // Otherwise test for trailing side
-  return (!lead && trailing(duration));
+  return (!leading && heldTrailing(duration));
 }
 bool Button::released() {
   return stateChanged && !state;
 }
 
-// Register callbacks
-void Button::onPressed(function callback) {
-  onPressedCallback = callback;
+void Button::addCallback(function callback, unsigned int timeout, bool leading) {
+  if (leading) {
+    leadingCallbacks.insert(std::make_pair(timeout, callback));
+  } else {
+    trailingCallbacks.insert(std::make_pair(timeout, callback));
+  }
 }
-void Button::onReleased(function callback) {
-  onReleasedCallback = callback;
+void Button::removeCallback(function callback) {
+  removeCallback(callback, true);
+  removeCallback(callback, false);
 }
-void Button::onHeld(function callback, int duration) {
-  onHeldCallbacks.insert(std::make_pair(duration, callback));
-}
-// Remove callbacks
-void Button::removeOnPressed() {
-  onPressedCallback = NULL;
-}
-void Button::removeOnReleased() {
-  onReleasedCallback = NULL;
-}
-void Button::removeOnHeld(int duration){
-  onHeldCallbacks.erase(duration);
-}
-void Button::removeOnHeld(function callback){
-  for (std::pair<int, function> entry : onHeldCallbacks) {
+void Button::removeCallback(function callback, bool leading) {
+  callbacksMap callbacks = (leading)
+    ? leadingCallbacks
+    : trailingCallbacks;
+  for (callbackPair entry : callbacks) {
     if (entry.second == callback) {
-      onHeldCallbacks.erase(entry.first);
+      callbacks.erase(entry.first);
     }
   }
 }
 
-bool Button::leading(int duration) {
+// Private methods
+void Button::executeCallbacks() {
+  if (state && leadingCallbacks.size()) {
+    for (callbackPair entry : leadingCallbacks) {
+      int timeout = entry.first;
+      if (heldLeading(timeout)) {
+        if (handledTimeout < (int) timeout) {
+          handledTimeout = timeout; // Only fire once for this timeout
+          function callback = entry.second;
+          callback();
+        }
+        break;
+      }
+    }
+  } else if (released() && trailingCallbacks.size()) {
+    for (callbackPair entry : trailingCallbacks) {
+      int timeout = entry.first;
+      if (heldTrailing(timeout)) {
+        function callback = entry.second;
+        callback();
+        break;
+      }
+    }
+
+  }
+}
+
+bool Button::heldLeading(unsigned int duration) {
   return (state // Button is down
     && durationSince(stateChangeTimestamp) > duration // for longer than `duration`
   );
 }
-
-bool Button::trailing(int duration) {
+bool Button::heldTrailing(unsigned int duration) {
   return (stateChanged // Button moved
     && !state // Button is up
     && duration < durationSince(previousStateChangeTimestamp) // and previous state was longer than `duration`
@@ -111,6 +107,7 @@ bool Button::trailing(int duration) {
 bool Button::getHardwareState() {
   return !digitalRead(pinButton); // with INPUT_PULLUP, down is 1, up is 0;
 }
-int Button::durationSince(unsigned long timestamp) {
+unsigned int Button::durationSince(unsigned long timestamp) {
   return (timestamp == 0) ? 0 : millis() - timestamp;
 }
+
