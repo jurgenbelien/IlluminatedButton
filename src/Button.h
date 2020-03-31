@@ -47,6 +47,6 @@ class Button {
     void executeCallbacks();
     void (*onPressedCallback)();
     void (*onReleasedCallback)();
-    std::map<int, function> onHeldCallbacks; // sort highest to lowest
+    std::map<int, function, std::greater<int>> onHeldCallbacks; // sort highest to lowest
 
 };
