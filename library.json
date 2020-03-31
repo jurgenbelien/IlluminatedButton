@@ -11,12 +11,6 @@
     "*.png",
     "*.zip"
   ],
-  "dependencies": [
-    {
-      "name": "Bounce2",
-      "version": "^2.53"
-    }
-  ],
   "frameworks": "arduino",
   "platforms": "*"
 }

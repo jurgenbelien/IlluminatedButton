@@ -1,6 +1,5 @@
 # IlluminatedButton
-Class for working with buttons with leds inside. This class is dependent on
-[Bounce2](https://github.com/thomasfredericks/Bounce2) class.
+Class for working with buttons with leds inside.
 
 **Note: multi-LED functionality is untested**
 
