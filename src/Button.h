@@ -18,7 +18,7 @@ class Button {
 
     bool pressed();
     bool held();
-    bool held(int duration, bool updateHandledDuration = true);
+    bool held(int duration, bool lead = false);
     bool released();
 
     // Callbacks
@@ -32,6 +32,9 @@ class Button {
 
   private:
     const uint8_t pinButton;
+
+    bool leading(int duration);
+    bool trailing(int duration);
 
     bool state = 0;
     bool stateChanged = false;

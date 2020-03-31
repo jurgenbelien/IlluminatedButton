@@ -52,15 +52,16 @@ bool Button::pressed() {
 bool Button::held() {
   return state;
 }
-bool Button::held(int duration, bool updateHandledDuration) {
-  bool heldForDuration = state // Button is down
-    && durationSince(stateChangeTimestamp) > duration // for longer than specified
-    && handledDuration < duration // and previously handled duration is lower than specified duration
-  ;
-  if (heldForDuration && updateHandledDuration) {
-    handledDuration = duration;
+bool Button::held(int duration, bool lead) {
+  // Test for leading side held
+  if (lead && leading(duration)) {
+    if (handledDuration < duration) {
+      handledDuration = duration; // return true once for this duration
+      return true;
+    }
   }
-  return heldForDuration;
+  // Otherwise test for trailing side
+  return (!lead && trailing(duration));
 }
 bool Button::released() {
   return stateChanged && !state;
@@ -92,6 +93,19 @@ void Button::removeOnHeld(function callback){
       onHeldCallbacks.erase(entry.first);
     }
   }
+}
+
+bool Button::leading(int duration) {
+  return (state // Button is down
+    && durationSince(stateChangeTimestamp) > duration // for longer than `duration`
+  );
+}
+
+bool Button::trailing(int duration) {
+  return (stateChanged // Button moved
+    && !state // Button is up
+    && duration < durationSince(previousStateChangeTimestamp) // and previous state was longer than `duration`
+  );
 }
 
 bool Button::getHardwareState() {
