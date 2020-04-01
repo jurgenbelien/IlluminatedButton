@@ -45,7 +45,6 @@ class Button {
     int handledTimeout = -1;  // callback timeout can be 0
     unsigned int durationSince(unsigned long int timestamp);
 
-
     callbacksMap leadingCallbacks;
     callbacksMap trailingCallbacks;
 
