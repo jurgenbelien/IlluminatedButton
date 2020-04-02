@@ -1,115 +1,50 @@
-#define BOUNCE_WITH_PROMPT_DETECTION // Immediately register button press
-#define BUTTON_BOUNCE_INTERVAL 15
-#define BUTTON_LONG_PRESS_INTERVAL 1000
-
 #define LED_OFF  0
 #define LED_LOW  64
 #define LED_MID  127
 #define LED_HIGH 255
 
 #include <core_pins.h>
-#include <Bounce2.h>
+#include <stddef.h>
+#include <vector>
 
-class IlluminatedButton {
+using std::vector;
+
+#include "Button.h"
+#include "Led.h"
+
+class IlluminatedButton : public Button {
   public:
-    IlluminatedButton(int pinButton, int pinLed0)
-    : IlluminatedButton(pinButton, pinLed0, pinLed0) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1)
-    : IlluminatedButton(pinButton, pinLed0, pinLed1, pinLed1) {}
-    IlluminatedButton(int pinButton, int pinLed0, int pinLed1, int pinLed2)
-    : pinButton(pinButton),
-      pinLed0(pinLed0),
-      pinLed1(pinLed1),
-      pinLed2(pinLed2),
-      debouncer(Bounce()) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0)
+    : Button(pinButton),
+      leds({ Led(pinLed0) }),
+      intensities(1) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1)
+    : Button(pinButton),
+      leds({ Led(pinLed0), Led(pinLed1) }),
+      intensities(2) {}
+    IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1, uint8_t pinLed2)
+    : Button(pinButton),
+      leds({ Led(pinLed0), Led(pinLed1), Led(pinLed2) }),
+      intensities(3) {}
 
     void init();
     void update();
 
-    bool pressed();
-    bool pressed(int value0);
-    bool pressed(int value0, int value1);
-    bool pressed(int value0, int value1, int value2);
-    bool longPressed();
-    bool released();
+    bool pressed(const vector<uint8_t>& values = {}, bool leading = false);
+    bool held(unsigned int duration, const vector<uint8_t>& values = {}, bool leading = false);
 
-    // Register callbacks
-    void onPressed(void (*callback)()) {
-      pressedCallback = callback;
-    }
-    void onLongPressed(void (*callback)()) {
-      longPressedCallback = callback;
-    }
-    void onReleased(void (*callback)()) {
-      releasedCallback = callback;
-    }
-    // Remove callbacks
-    void removeOnPressed() {
-      pressedCallback = NULL;
-    }
-    void removeOnLongPressed() {
-      longPressedCallback = NULL;
-    }
-    void removeOnReleased() {
-      releasedCallback = NULL;
-    }
+    int held();
 
-    void set(int value) {
-      set(0, value);
-    }
-    void set(int led, int value) {
-      intensity(led, value, true);
-    }
-
-    // Convienence methods
-    void on() {
-      on(0);
-    }
-    void on(int led) {
-      set(led, LED_HIGH);
-    }
-
-    void off() {
-      off(0);
-    }
-    void off(int led) {
-      set(led, LED_OFF);
-    }
-
-    void dim() {
-      dim(0);
-    }
-    void dim(int led) {
-      set(led, LED_MID);
-    }
-
-    void rgb(int r, int g, int b) {
-      intensity(0, r, true);
-      intensity(1, g, true);
-      intensity(2, b, true);
-    }
+    void set(const vector<uint8_t>& values);
+    void set(uint8_t ledIndex, uint8_t value);
 
   private:
-    int pinButton;
+    vector<Led> leds;
+    vector<uint8_t> intensities;
 
-    int pinLed(int led);
-    int pinLed0;
-    int pinLed1;
-    int pinLed2;
+    void setLedIntensity(const vector<uint8_t>& values, bool save = true);
+    void setLedIntensity(uint8_t ledIndex, uint8_t value, bool save = true);
+    uint8_t getLedIntensity(uint8_t ledIndex);
 
-    int intensityLed0;
-    int intensityLed1;
-    int intensityLed2;
-
-    unsigned long pressedMillis = 0;
-
-    void intensity(int led, int value, bool save = false);
-
-    void (*pressedCallback)();
-    void (*longPressedCallback)();
-    void (*releasedCallback)();
-
-    void restoreIntensity();
-
-    Bounce debouncer;
+    void restore();
 };
