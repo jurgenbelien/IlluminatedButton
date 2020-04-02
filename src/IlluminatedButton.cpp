@@ -16,35 +16,19 @@ void IlluminatedButton::update() {
   }
 }
 
-bool IlluminatedButton::pressed(bool leading) {
-  return IlluminatedButton::held(0, leading);
+bool IlluminatedButton::pressed(const vector<uint8_t>& values, bool leading) {
+  return IlluminatedButton::held(0, values, leading);
 }
-bool IlluminatedButton::held(unsigned int duration, bool leading) {
-  return Button::held(duration, leading);
-}
-bool IlluminatedButton::released() {
-  return Button::released();
+bool IlluminatedButton::held(unsigned int duration, const vector<uint8_t>& values, bool leading) {
+    bool heldLeading = Button::held(duration, true);
+  if (heldLeading) {
+    setLedIntensity(values, false);
+  }
+  return leading ? heldLeading : Button::held(duration, leading);
 }
 
 int IlluminatedButton::held() {
   return Button::held();
-}
-
-bool IlluminatedButton::pressedIlluminate(const vector<uint8_t>& values) {
-  return IlluminatedButton::pressedIlluminate(values, false);
-}
-bool IlluminatedButton::pressedIlluminate(const vector<uint8_t>& values, bool leading) {
-  return IlluminatedButton::heldIlluminate(values, 0, leading);
-}
-bool IlluminatedButton::heldIlluminate(const vector<uint8_t>& values, unsigned int duration) {
-  return IlluminatedButton::heldIlluminate(values, duration, false);
-}
-bool IlluminatedButton::heldIlluminate(const vector<uint8_t>& values, unsigned int duration, bool leading) {
-  bool heldLeading = Button::held(duration, true);
-  if (heldLeading) {
-    setLedIntensity(values, false);
-  }
-  return leading ? heldLeading : IlluminatedButton::held(duration, leading);
 }
 
 // Set LED and save state

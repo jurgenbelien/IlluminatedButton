@@ -34,16 +34,10 @@ class IlluminatedButton : public Button {
     void init();
     void update();
 
-    bool pressed(bool leading = false);
-    bool held(unsigned int duration, bool leading = false);
-    bool released();
+    bool pressed(const vector<uint8_t>& values = {}, bool leading = false);
+    bool held(unsigned int duration, const vector<uint8_t>& values = {}, bool leading = false);
 
     int held();
-
-    bool pressedIlluminate(const vector<uint8_t>& values);
-    bool pressedIlluminate(const vector<uint8_t>& values, bool leading);
-    bool heldIlluminate(const vector<uint8_t>& values, unsigned int duration);
-    bool heldIlluminate(const vector<uint8_t>& values, unsigned int duration, bool leading);
 
     void set(const vector<uint8_t>& values);
     void set(uint8_t ledIndex, uint8_t value);
