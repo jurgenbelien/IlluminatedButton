@@ -18,7 +18,7 @@ class Button {
     void init();
     void update();
 
-    bool pressed();
+    bool pressed(bool leading = true);
     int held();
     bool held(unsigned int duration, bool leading = false);
     bool released();
@@ -44,7 +44,6 @@ class Button {
     int handledDuration = -1; // hold duration can be 0
     int handledTimeout = -1;  // callback timeout can be 0
     unsigned int durationSince(unsigned long int timestamp);
-
 
     callbacksMap leadingCallbacks;
     callbacksMap trailingCallbacks;

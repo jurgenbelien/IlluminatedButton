@@ -9,48 +9,46 @@
 
 #include <core_pins.h>
 #include <stddef.h>
+#include <vector>
+
+using std::vector;
 
 #include "Button.h"
 #include "Led.h"
 
-class IlluminatedButton : public Button, public Led {
+class IlluminatedButton : public Button {
   public:
     IlluminatedButton(uint8_t pinButton, uint8_t pinLed0)
-    : IlluminatedButton(pinButton, pinLed0, pinLed0) {}
+    : Button(pinButton),
+      leds({ Led(pinLed0) }),
+      intensities(1) {}
     IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1)
-    : IlluminatedButton(pinButton, pinLed0, pinLed1, pinLed1) {}
+    : Button(pinButton),
+      leds({ Led(pinLed0), Led(pinLed1) }),
+      intensities(2) {}
     IlluminatedButton(uint8_t pinButton, uint8_t pinLed0, uint8_t pinLed1, uint8_t pinLed2)
     : Button(pinButton),
-      Led(pinLed0, pinLed1, pinLed2) {}
+      leds({ Led(pinLed0), Led(pinLed1), Led(pinLed2) }),
+      intensities(3) {}
 
     void init();
     void update();
 
-    bool pressed();
-    bool pressed(uint8_t value0);
-    bool pressed(uint8_t value0, uint8_t value1);
-    bool pressed(uint8_t value0, uint8_t value1, uint8_t value2);
+    bool pressed(const vector<uint8_t>& values = {}, bool leading = false);
+    bool held(unsigned int duration, const vector<uint8_t>& values = {}, bool leading = false);
 
-    void set(uint8_t value0);
-    void set(uint8_t led, uint8_t value);
+    int held();
 
-    // Convienence methods
-    void on();
-    void on(uint8_t led);
-    void off();
-    void off(uint8_t led);
-    void dim();
-    void dim(uint8_t led);
-    void rgb(uint8_t r, uint8_t g, uint8_t b);
+    void set(const vector<uint8_t>& values);
+    void set(uint8_t ledIndex, uint8_t value);
 
   private:
-    bool setHardwareLedIntensity(uint8_t led, uint8_t value);
-    void setLedIntensity(uint8_t led, uint8_t value);
-    uint8_t getLedIntensity(uint8_t led);
+    vector<Led> leds;
+    vector<uint8_t> intensities;
 
-    uint8_t led0Intensity;
-    uint8_t led1Intensity;
-    uint8_t led2Intensity;
+    void setLedIntensity(const vector<uint8_t>& values, bool save = true);
+    void setLedIntensity(uint8_t ledIndex, uint8_t value, bool save = true);
+    uint8_t getLedIntensity(uint8_t ledIndex);
 
     void restore();
 };

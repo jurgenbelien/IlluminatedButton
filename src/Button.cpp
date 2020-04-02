@@ -21,8 +21,8 @@ void Button::update() {
   executeCallbacks();
 }
 
-bool Button::pressed() {
-  return stateChanged && state;
+bool Button::pressed(bool leading) {
+  return (leading) ? stateChanged && state : Button::released();
 }
 int Button::held() {
   return state ? durationSince(stateChangeTimestamp) : 0;
@@ -44,10 +44,11 @@ bool Button::released() {
 }
 
 void Button::addCallback(function callback, unsigned int timeout, bool leading) {
+  callbackPair entry = std::make_pair(timeout, callback);
   if (leading) {
-    leadingCallbacks.insert(std::make_pair(timeout, callback));
+    leadingCallbacks.insert(entry);
   } else {
-    trailingCallbacks.insert(std::make_pair(timeout, callback));
+    trailingCallbacks.insert(entry);
   }
 }
 void Button::removeCallback(function callback) {
