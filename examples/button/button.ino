@@ -13,13 +13,14 @@ void setup() {
 void loop() {
   button.update();
 
+  Serial.println("All conditionals will only be true once per button interaction.");
   if (button.pressed()) {
-    Serial.println("Button pressed");
+    Serial.println("Button is pressed.");
   }
   if (button.held(500)) {
-    Serial.println("Button long-pressed");
+    Serial.println("Button is held for 500ms.");
   }
   if (button.released()) {
-    Serial.println("Button released");
+    Serial.println("Button is released.");
   }
 }

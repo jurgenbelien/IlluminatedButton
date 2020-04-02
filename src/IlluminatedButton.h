@@ -1,7 +1,3 @@
-#define BOUNCE_WITH_PROMPT_DETECTION // Immediately register button press
-#define BUTTON_BOUNCE_INTERVAL 15
-#define BUTTON_LONG_PRESS_INTERVAL 1000
-
 #define LED_OFF  0
 #define LED_LOW  64
 #define LED_MID  127
