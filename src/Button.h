@@ -18,7 +18,7 @@ class Button {
     void init();
     void update();
 
-    bool pressed();
+    bool pressed(bool leading = true);
     int held();
     bool held(unsigned int duration, bool leading = false);
     bool released();
