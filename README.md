@@ -6,7 +6,7 @@ Class for working with buttons with leds inside.
 ## Example usage
 
 ```cpp
-#include "./src/IlluminatedButton.h"
+#include <IlluminatedButton.h>
 
 #define PIN_BUTTON 3
 #define PIN_LED 1
