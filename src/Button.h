@@ -1,5 +1,6 @@
-
-#define THROTTLE_INTERVAL 5
+#ifndef THROTTLE_INTERVAL
+  #define THROTTLE_INTERVAL 5
+#endif
 
 #include <inttypes.h>
 #include <core_pins.h>
