@@ -6,20 +6,21 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-IlluminatedButton	KEYWORD1
+IlluminatedButton	  KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-init	KEYWORD2
-update	KEYWORD2
-pressed	KEYWORD2
-held    KEYWORD2
-released	KEYWORD2
-set  KEYWORD2
-addCallback KEYWORD2
-removeCallblack KEYWORD2
+init	              KEYWORD2
+update	            KEYWORD2
+pressed	            KEYWORD2
+held                KEYWORD2
+released	          KEYWORD2
+set                 KEYWORD2
+restore             KEYWORD2
+addCallback         KEYWORD2
+removeCallblack     KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
@@ -29,4 +30,4 @@ removeCallblack KEYWORD2
 # Constants (LITERAL1)
 #######################################
 
-THROTTLE_INTERVAL LITERAL1
+THROTTLE_INTERVAL   LITERAL1
