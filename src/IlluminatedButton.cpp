@@ -45,6 +45,14 @@ void IlluminatedButton::setVolatile(uint8_t ledIndex, uint8_t value) {
   setLedIntensity(ledIndex, value, false);
 }
 
+vector<uint8_t> IlluminatedButton::getLedIntensities() {
+  return intensities;
+}
+
+uint8_t IlluminatedButton::getLedIntensity(uint8_t ledIndex) {
+  return intensities[ledIndex];
+}
+
 void IlluminatedButton::restore() {
   IlluminatedButton::setLedIntensities(intensities, false);
 }

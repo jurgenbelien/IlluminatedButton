@@ -39,6 +39,8 @@ class IlluminatedButton : public Button {
     void set(uint8_t ledIndex, uint8_t value);
     void setVolatile(const vector<uint8_t>& values);
     void setVolatile(uint8_t ledIndex, uint8_t value);
+    vector<uint8_t> getLedIntensities();
+    uint8_t getLedIntensity(uint8_t ledIndex);
     void restore();
 
   private:
@@ -47,5 +49,4 @@ class IlluminatedButton : public Button {
 
     void setLedIntensities(const vector<uint8_t>& values, bool save = true);
     void setLedIntensity(uint8_t ledIndex, uint8_t value, bool save = true);
-    uint8_t getLedIntensity(uint8_t ledIndex);
 };
